@@ -1,4 +1,3 @@
-
 import cv2
 
 class VideoProcessor:
@@ -16,6 +15,11 @@ class VideoProcessor:
         self.AWAKE_THRESHOLD = 5
 
     def process_frame(self, frame):
+        # Ensure the frame is in the correct format
+        if frame is None or frame.size == 0:
+            print("Error: Empty frame received.")
+            return False
+
         # Resize the frame to match the GUI video frame dimensions
         frame = cv2.resize(frame, (self.gui.video_frame.winfo_width(), self.gui.video_frame.winfo_height()))
         # Detect faces in the frame

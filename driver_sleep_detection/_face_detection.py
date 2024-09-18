@@ -14,6 +14,11 @@ class FaceDetector:
             self.predictor = None
 
     def detect_faces(self, frame):
+        # Ensure the frame is in the correct format
+        if frame is None or frame.size == 0:
+            print("Error: Empty frame received.")
+            return []
+
         # Convert the frame to grayscale for face detection
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # Detect faces in the grayscale frame
