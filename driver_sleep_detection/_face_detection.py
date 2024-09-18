@@ -2,65 +2,71 @@ import cv2
 import dlib
 import numpy as np
 
+
 class FaceDetector:
     def __init__(self):
-        # Initialize the face detector from dlib
+        # Khởi tạo bộ phát hiện khuôn mặt từ dlib
         self.detector = dlib.get_frontal_face_detector()
         try:
-            # Load the facial landmark predictor
-            self.predictor = dlib.shape_predictor("assets/shape_predictor_68_face_landmarks.dat")
+            # Tải bộ dự đoán điểm đặc trưng trên khuôn mặt
+            self.predictor = dlib.shape_predictor(
+                "assets/shape_predictor_68_face_landmarks.dat"
+            )
         except RuntimeError:
-            print("Error: 'shape_predictor_68_face_landmarks.dat' not found. Please ensure the model file exists.")
+            print(
+                "Lỗi: Không tìm thấy 'shape_predictor_68_face_landmarks.dat'. Vui lòng đảm bảo tệp mô hình tồn tại."
+            )
             self.predictor = None
 
     def detect_faces(self, frame):
-        # Ensure the frame is in the correct format
+        # Đảm bảo khung hình ở định dạng đúng
         if frame is None or frame.size == 0:
-            print("Error: Empty frame received.")
+            print("Lỗi: Nhận được khung hình trống.")
             return []
 
-        # Convert the frame to grayscale for face detection
+        # Chuyển đổi khung hình sang thang độ xám để phát hiện khuôn mặt
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # Detect faces in the grayscale frame
+        # Phát hiện khuôn mặt trong khung hình thang độ xám
         faces = self.detector(gray)
-        return list(faces)  # Convert dlib.rectangles to a list
+        return list(faces)  # Chuyển đổi dlib.rectangles thành danh sách
 
     def get_landmarks(self, frame, face):
-        # Convert the frame to grayscale for landmark detection
+        # Chuyển đổi khung hình sang thang độ xám để phát hiện điểm đặc trưng
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # Detect facial landmarks
+        # Phát hiện điểm đặc trưng trên khuôn mặt
         landmarks = self.predictor(gray, face)
-        # Convert landmarks to a numpy array of (x, y) coordinates
+        # Chuyển đổi điểm đặc trưng thành mảng numpy của các tọa độ (x, y)
         return np.array([[p.x, p.y] for p in landmarks.parts()])
 
     def detect_sleep(self, landmarks):
         def eye_aspect_ratio(eye):
-            # Check if we have enough points to calculate EAR
+            # Kiểm tra xem có đủ điểm để tính toán EAR không
             if len(eye) < 6:
-                return 0  # or some other default value
+                return 0  # hoặc một giá trị mặc định khác
 
-            # Calculate pairwise distances between eye landmarks
+            # Tính toán khoảng cách cặp giữa các điểm đặc trưng của mắt
             A = np.linalg.norm(eye[1] - eye[5])
             B = np.linalg.norm(eye[2] - eye[4])
             C = np.linalg.norm(eye[0] - eye[3])
-            
-            # Calculate the eye aspect ratio
+
+            # Tính toán tỷ lệ khía cạnh của mắt
             ear = (A + B) / (2.0 * C)
             return ear
 
-        # Extract landmarks for left and right eyes
+        # Trích xuất điểm đặc trưng cho mắt trái và mắt phải
         left_eye = landmarks[42:48]
         right_eye = landmarks[36:42]
-        # Calculate EAR for both eyes
+        # Tính toán EAR cho cả hai mắt
         left_ear = eye_aspect_ratio(left_eye)
         right_ear = eye_aspect_ratio(right_eye)
-        # Calculate the average EAR
+        # Tính toán EAR trung bình
         avg_ear = (left_ear + right_ear) / 2.0
 
-        # Define the threshold for determining if eyes are closed
+        # Định nghĩa ngưỡng để xác định xem mắt có đóng hay không
         EAR_THRESHOLD = 0.25
-        # Return True if eyes are likely closed, False otherwise
+        # Trả về True nếu mắt có khả năng đóng, False nếu không
         return avg_ear < EAR_THRESHOLD
 
-# Add this line at the end of the file to specify what should be imported when using "from module import *"
-__all__ = ['FaceDetector']
+
+# Thêm dòng này vào cuối tệp để chỉ định những gì nên được nhập khi sử dụng "from module import *"
+__all__ = ["FaceDetector"]

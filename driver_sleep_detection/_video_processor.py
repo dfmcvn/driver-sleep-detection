@@ -1,65 +1,75 @@
 import cv2
 
+
 class VideoProcessor:
     def __init__(self, face_detector, gui, audio_manager):
-        # Initialize the VideoProcessor with necessary components
+        # Khởi tạo VideoProcessor với các thành phần cần thiết
         self.face_detector = face_detector
         self.gui = gui
         self.audio_manager = audio_manager
-        
-        # Initialize counters for sleep detection
+
+        # Khởi tạo bộ đếm cho việc phát hiện ngủ gật
         self.sleep_frames = 0
         self.awake_frames = 0
-        # Define thresholds for sleep and awake states
+        # Định nghĩa ngưỡng cho trạng thái ngủ và tỉnh táo
         self.SLEEP_THRESHOLD = 15
         self.AWAKE_THRESHOLD = 5
 
     def process_frame(self, frame):
-        # Ensure the frame is in the correct format
+        # Đảm bảo khung hình ở định dạng đúng
         if frame is None or frame.size == 0:
-            print("Error: Empty frame received.")
+            print("Lỗi: Nhận được khung hình trống.")
             return False
 
-        # Resize the frame to match the GUI video frame dimensions
-        frame = cv2.resize(frame, (self.gui.video_frame.winfo_width(), self.gui.video_frame.winfo_height()))
-        # Detect faces in the frame
+        # Thay đổi kích thước khung hình để khớp với kích thước khung video của GUI
+        frame = cv2.resize(
+            frame,
+            (self.gui.video_frame.winfo_width(), self.gui.video_frame.winfo_height()),
+        )
+        # Phát hiện khuôn mặt trong khung hình
         faces = self.face_detector.detect_faces(frame)
 
         is_sleeping = False
 
         for face in faces:
-            # Get facial landmarks for each detected face
+            # Lấy các điểm đặc trưng trên khuôn mặt cho mỗi khuôn mặt được phát hiện
             landmarks = self.face_detector.get_landmarks(frame, face)
-            # Determine if the face is showing signs of sleep
+            # Xác định xem khuôn mặt có dấu hiệu ngủ gật hay không
             face_sleeping = self.face_detector.detect_sleep(landmarks)
 
             if face_sleeping:
-                # Increment sleep frame counter and reset awake frame counter
+                # Tăng bộ đếm khung hình ngủ và đặt lại bộ đếm khung hình tỉnh táo
                 self.sleep_frames += 1
                 self.awake_frames = 0
             else:
-                # Increment awake frame counter
+                # Tăng bộ đếm khung hình tỉnh táo
                 self.awake_frames += 1
-                # If awake for long enough, reset sleep frame counter
+                # Nếu tỉnh táo đủ lâu, đặt lại bộ đếm khung hình ngủ
                 if self.awake_frames >= self.AWAKE_THRESHOLD:
                     self.sleep_frames = 0
 
-            # Determine if the person is considered sleeping based on the threshold
+            # Xác định xem người đó có được coi là đang ngủ dựa trên ngưỡng hay không
             is_sleeping = self.sleep_frames >= self.SLEEP_THRESHOLD
 
-            # Set rectangle color based on sleep state (green for awake, red for sleeping)
+            # Đặt màu hình chữ nhật dựa trên trạng thái ngủ (xanh lá cây cho tỉnh táo, đỏ cho ngủ)
             color = (0, 255, 0) if not is_sleeping else (0, 0, 255)
-            # Draw rectangle around the detected face
-            cv2.rectangle(frame, (face.left(), face.top()), (face.right(), face.bottom()), color, 2)
+            # Vẽ hình chữ nhật xung quanh khuôn mặt được phát hiện
+            cv2.rectangle(
+                frame,
+                (face.left(), face.top()),
+                (face.right(), face.bottom()),
+                color,
+                2,
+            )
 
-        # Update the GUI with the processed frame
+        # Cập nhật GUI với khung hình đã xử lý
         self.gui.update_video(frame)
 
-        # Play or stop the alarm based on the sleep state
+        # Phát hoặc dừng âm báo dựa trên trạng thái ngủ
         if is_sleeping:
             self.audio_manager.play_alarm()
         else:
             self.audio_manager.stop_alarm()
 
-        # Return the current sleep state
+        # Trả về trạng thái ngủ hiện tại
         return is_sleeping
