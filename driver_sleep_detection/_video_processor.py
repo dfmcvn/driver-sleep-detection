@@ -16,6 +16,10 @@ class VideoProcessor:
         self.AWAKE_THRESHOLD = 5
 
     def process_frame(self, frame):
+        # Check if the GUI is paused
+        if self.gui.is_paused:
+            return False
+
         # Đảm bảo khung hình ở định dạng đúng
         if frame is None or frame.size == 0:
             print("Lỗi: Nhận được khung hình trống.")
