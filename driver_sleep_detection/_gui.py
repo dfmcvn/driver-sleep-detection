@@ -24,6 +24,9 @@ class GUI:
         # Initialize video processing state
         self.is_paused = False
 
+        # Bind the window resize event
+        self.window.bind("<Configure>", self.on_resize)
+
     def create_widgets(self):
         # Tạo một khung để hiển thị video
         self.video_frame = ttk.Frame(self.window)
@@ -62,6 +65,8 @@ class GUI:
     def toggle_pause(self):
         self.is_paused = not self.is_paused
         self.pause_button.config(text="Start" if self.is_paused else "Pause")
+        # Hide FPS label when paused, show when running
+        self.fps_label.place_forget() if self.is_paused else self.fps_label.place(x=10, y=10)
 
     def update_video(self, frame):
         if self.is_paused:
@@ -90,3 +95,7 @@ class GUI:
         self.video_label.config(image=photo)
         # Giữ một tham chiếu để tránh việc bị xoá bỏ
         self.video_label.image = photo
+
+    def on_resize(self, event):
+        # Adjust the size of the video frame
+        self.video_label.pack(expand=True, fill=tk.BOTH)
