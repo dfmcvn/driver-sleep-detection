@@ -21,10 +21,29 @@ class GUI:
         # Tạo và thiết lập các widget của GUI
         self.create_widgets()
 
+        # Initialize video processing state
+        self.is_paused = False
+
     def create_widgets(self):
         # Tạo một khung để hiển thị video
         self.video_frame = ttk.Frame(self.window)
         self.video_frame.pack(expand=True, fill=tk.BOTH, padx=10, pady=10)
+
+        # Tạo một khung cho các nút điều khiển
+        self.control_frame = ttk.Frame(self.video_frame)
+        self.control_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=10)
+
+        # Tạo một khung con để chứa các nút và căn giữa chúng
+        self.button_frame = ttk.Frame(self.control_frame)
+        self.button_frame.pack(expand=True)
+
+        # Tạo nút Pause/Start
+        self.pause_button = ttk.Button(self.button_frame, text="Pause", command=self.toggle_pause)
+        self.pause_button.pack(side=tk.LEFT, padx=5)
+
+        # Tạo nút Quit
+        self.quit_button = ttk.Button(self.button_frame, text="Quit", command=self.window.quit)
+        self.quit_button.pack(side=tk.LEFT, padx=5)
 
         # Tạo một nhãn để hiển thị luồng video
         self.video_label = ttk.Label(self.video_frame)
@@ -40,7 +59,14 @@ class GUI:
         self.frame_count = 0
         self.start_time = time.time()
 
+    def toggle_pause(self):
+        self.is_paused = not self.is_paused
+        self.pause_button.config(text="Start" if self.is_paused else "Pause")
+
     def update_video(self, frame):
+        if self.is_paused:
+            return
+
         # Increment frame count
         self.frame_count += 1
 
