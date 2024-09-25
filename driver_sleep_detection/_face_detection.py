@@ -1,6 +1,7 @@
 import cv2
 import dlib
 import numpy as np
+import sys  # Import sys module
 
 
 class FaceDetector:
@@ -8,10 +9,12 @@ class FaceDetector:
         # Khởi tạo bộ phát hiện khuôn mặt từ dlib
         self.detector = dlib.get_frontal_face_detector()
         try:
+            # Sử dụng sys._MEIPASS để lấy đường dẫn đúng đến tệp mô hình khi sử dụng PyInstaller
+            model_path = "assets/shape_predictor_68_face_landmarks.dat"
+            if hasattr(sys, "_MEIPASS"):
+                model_path = f"{sys._MEIPASS}/{model_path}"
             # Tải bộ dự đoán điểm đặc trưng trên khuôn mặt
-            self.predictor = dlib.shape_predictor(
-                "assets/shape_predictor_68_face_landmarks.dat"
-            )
+            self.predictor = dlib.shape_predictor(model_path)
         except RuntimeError:
             print(
                 "Lỗi: Không tìm thấy 'shape_predictor_68_face_landmarks.dat'. Vui lòng đảm bảo tệp mô hình tồn tại."
