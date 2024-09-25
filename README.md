@@ -26,7 +26,7 @@ To run this project, follow these steps:
 2. **Set up a virtual environment (optional but recommended)**:
     ```bash
     python -m venv .venv
-    source .venv/bin/activate   # On Windows: .venv\Scripts\activate
+    source .venv/bin/activate
     ```
 
 3. **Install required dependencies**:
@@ -39,11 +39,19 @@ To run this project, follow these steps:
    pip install opencv-python dlib pygame tk pyinstaller Pillow
    ```
 
-5. **Run the main script**:
+4. **Run the main script**:
     Once dependencies are installed, you can run the project using the following command:
     ```bash
     python main.py
     ```
+5. **Compile the project to an executable file**:
+    If you want to compile the project into a standalone executable file, you can use PyInstaller. Run the following command:
+    ```bash
+    pyinstaller --onefile --add-data "assets:assets" --add-data "driver_sleep_detection:driver_sleep_detection" main.py
+    ```
+    This command will generate a `dist` directory containing the executable file `main`. You can then run the executable without needing to install Python or any dependencies on the target machine.
+
+    Note: Ensure that the `assets` directory and the `driver_sleep_detection` package are in the same directory as `main.py` when running the PyInstaller command.
 
 ---
 
