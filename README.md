@@ -64,7 +64,7 @@ To run this project, follow these steps:
 - tk
 - Pillow
 
-Install all dependencies using the `requirements.txt` file provided.
+or install all dependencies using the `requirements.txt` file provided.
 
 ---
 
